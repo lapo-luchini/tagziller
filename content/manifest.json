@@ -1,0 +1,40 @@
+{
+  "manifest_version": 2,
+  "name": "Tagziller",
+  "description": "TagZilla reborn!",
+  "version": "0.1",
+  "author": "Lapo Luchini",
+  "applications": {
+    "gecko": {
+      "id": "tagzilla@lapo.it",
+      "strict_min_version": "74.0"
+      // "strict_max_version": "78.*"
+    }
+  },
+  "icons": {
+    "64": "images/icon-64px.png",
+    "32": "images/icon-32px.png",
+    "16": "images/icon-16px.png"
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  // "options_ui": {
+  //   "page": "options.html",
+  //   "open_in_tab": false,
+  //   "browser_style": true
+  // },
+  "compose_action": {
+    // "default_popup": "popup.html",
+    "default_title": "🍺"
+  },
+  // "browser_action": {
+  //   "default_title": "await popup"
+  // },
+  "permissions": [
+    "compose",
+    "storage"
+  ]
+}
