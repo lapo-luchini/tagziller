@@ -51,6 +51,15 @@ browser.compose.onBeforeSend.addListener(async tab => {
         console.log('TagZiller: skipping identity ' + details.identityId);
         return;
     }
+    if (conf.denyTo) {
+        const deny = new RegExp(conf.denyTo);
+        const receivers = [].concat(details.to, details.cc, details.bcc, details.newsgroups);
+        for (let addr of receivers)
+            if (deny.test(addr)) {
+                console.log('TagZiller: skipping, receiver in deny list: ' + addr);
+                return;
+            }
+    }
     if (!conf.tags || conf.tags.length == 0) {
         console.log('TagZiller: database is empty.');
         return;

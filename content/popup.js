@@ -1,26 +1,23 @@
 const file = document.getElementById('file');
 const num = document.getElementById('num');
 const identity = document.getElementById('identity');
-// const denyTo = document.getElementById('denyTo');
+const denyTo = document.getElementById('denyTo');
 const ignore = /^#|^\s*$/;
 
-browser.storage.local.get(['tags', 'identity', 'denyTo']).then(conf => {
+browser.storage.local.get(['tags', 'identity', 'denyTo']).then(async conf => {
     // console.log('Config:', conf);
     num.innerText = conf.tags ? conf.tags.length : '0';
     denyTo.value = conf.denyTo || '';
-    browser.accounts.list().then(list => {
-        // console.log('Accounts:', list);
-        for (let account of list) {
-            for (let id of account.identities) {
-                const option = document.createElement('option');
-                option.value = id.id;
-                option.innerText = account.name + ' <' + id.email + '>';
-                identity.appendChild(option);
-                if (id.id == conf.identity)
-                    option.selected = true;
-            }
+    for (let account of await browser.accounts.list()) {
+        for (let id of account.identities) {
+            const option = document.createElement('option');
+            option.value = id.id;
+            option.innerText = account.name + ' <' + id.email + '>';
+            identity.appendChild(option);
+            if (id.id == conf.identity)
+                option.selected = true;
         }
-    });
+    }
 });
 
 file.onchange = () => {
@@ -43,7 +40,6 @@ identity.onchange = () => {
     browser.storage.local.set({ identity: identity.value });
 };
 
-/*
 denyTo.onchange = () => {
     try {
         new RegExp(denyTo.value);
@@ -52,4 +48,3 @@ denyTo.onchange = () => {
         console.log('Invalid RegExp:', denyTo.value);
     }
 };
-*/
