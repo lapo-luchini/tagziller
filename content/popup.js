@@ -1,5 +1,6 @@
 const file = document.getElementById('file');
 const num = document.getElementById('num');
+const ignore = /^#|^\s*$/;
 
 browser.storage.local.get('tags').then(res => {
     if (res.tags)
@@ -13,7 +14,7 @@ file.onchange = () => {
     reader.onload = (e) => {
         const tags = [];
         for (let s of e.target.result.split(/\r?\n/)) {
-            if (s.length == 0 || s[0] == '#')
+            if (ignore.test(s))
                 continue;
             tags.push(s);
         }

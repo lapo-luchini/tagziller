@@ -21,18 +21,9 @@
       "background.js"
     ]
   },
-  // "options_ui": {
-  //   "page": "options.html",
-  //   "open_in_tab": false,
-  //   "browser_style": true
-  // },
   "compose_action": {
-    // "default_popup": "popup.html",
-    "default_title": "🍺"
+    "default_title": "TagZ"
   },
-  // "browser_action": {
-  //   "default_title": "await popup"
-  // },
   "permissions": [
     "compose",
     "storage"
