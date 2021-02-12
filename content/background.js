@@ -44,13 +44,18 @@ function getRandomInt(max) {
 
 browser.compose.onBeforeSend.addListener(async tab => {
     console.log('onBeforeSend:', tab);
-    let details = await browser.compose.getComposeDetails(tab.id);
+    const details = await browser.compose.getComposeDetails(tab.id);
     console.log('Details:', details);
-    let tag = 'Sent from my Thunderbird';
-    const tags = (await browser.storage.local.get('tags')).tags;
-    console.log('Tags:', tags);
-    if (tags && tags.length > 0)
-        tag = tags[getRandomInt(tag.length)];
+    const conf = await browser.storage.local.get(['tags', 'identity', 'denyTo']);
+    if (conf.identity && conf.identity != '*' && conf.identity != details.identityId) {
+        console.log('TagZiller: skipping identity ' + details.identityId);
+        return;
+    }
+    if (!conf.tags || conf.tags.length == 0) {
+        console.log('TagZiller: database is empty.');
+        return;
+    }
+    const tag = conf.tags[getRandomInt(conf.tag.length)];
 
     if (details.isPlainText) {
         // The message is being composed in plain text mode.

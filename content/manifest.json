@@ -7,7 +7,7 @@
   "applications": {
     "gecko": {
       "id": "tagzilla@lapo.it",
-      "strict_min_version": "74.0"
+      "strict_min_version": "76.0"
       // "strict_max_version": "78.*"
     }
   },
@@ -25,6 +25,7 @@
     "default_title": "TagZ"
   },
   "permissions": [
+    "accountsRead",
     "compose",
     "storage"
   ]
