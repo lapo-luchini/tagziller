@@ -43,8 +43,10 @@ identity.onchange = () => {
 denyTo.onchange = () => {
     try {
         new RegExp(denyTo.value);
+        denyTo.className = '';
         browser.storage.local.set({ denyTo: denyTo.value });
     } catch (e) {
+        denyTo.className = 'error';
         console.log('Invalid RegExp:', denyTo.value);
     }
 };
