@@ -63,7 +63,7 @@ browser.compose.onBeforeSend.addListener(async tab => {
         console.log('Database is empty.');
         return;
     }
-    const tag = conf.tags[getRandomInt(conf.tag.length)];
+    const tag = conf.tags[getRandomInt(conf.tags.length)];
 
     if (details.isPlainText) {
         // The message is being composed in plain text mode.
