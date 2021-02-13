@@ -1,5 +1,5 @@
-export function log(s) {
-    console.log.apply(console, ['[TagZiller]'].concat(s));
+export function log(...args) {
+    console.log('[TagZiller]', ...args);
 }
 
 export async function loadCfg(keys) {
