@@ -1,11 +1,13 @@
+import { log, loadCfg } from './common.js';
+
 const file = document.getElementById('file');
 const num = document.getElementById('num');
 const identity = document.getElementById('identity');
 const denyTo = document.getElementById('denyTo');
 const ignore = /^#|^\s*$/;
 
-browser.storage.local.get(['tags', 'identity', 'denyTo']).then(async conf => {
-    // console.log('Config:', conf);
+loadCfg(['tags', 'identity', 'denyTo']).then(async conf => {
+    // log('Config:', conf);
     num.innerText = conf.tags ? conf.tags.length : '0';
     denyTo.value = conf.denyTo || '';
     for (let account of await browser.accounts.list()) {
@@ -36,7 +38,7 @@ file.onchange = () => {
 };
 
 identity.onchange = () => {
-    console.log('New identity:', identity.value);
+    log('New identity:', identity.value);
     browser.storage.local.set({ identity: identity.value });
 };
 
@@ -47,6 +49,6 @@ denyTo.onchange = () => {
         browser.storage.local.set({ denyTo: denyTo.value });
     } catch (e) {
         denyTo.className = 'error';
-        console.log('Invalid RegExp:', denyTo.value);
+        log('Invalid RegExp:', denyTo.value);
     }
 };

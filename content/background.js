@@ -1,3 +1,5 @@
+import { log, loadCfg } from './common.js';
+
 let popup = null;
 messenger.composeAction.onClicked.addListener(async () => {
     async function popupClosePromise(popupId) {
@@ -20,11 +22,9 @@ messenger.composeAction.onClicked.addListener(async () => {
     }
 
     if (popup) {
-        console.log('Existing.');
         // popup.focus();
         return;
     }
-    console.log('Creating.');
     popup = await messenger.windows.create({
         url: 'popup.html',
         type: 'popup',
@@ -33,7 +33,6 @@ messenger.composeAction.onClicked.addListener(async () => {
         width: 390
     });
     await popupClosePromise(popup.id);
-    console.log('Closed.');
     popup = null;
 });
 
@@ -43,12 +42,12 @@ function getRandomInt(max) {
 }
 
 browser.compose.onBeforeSend.addListener(async tab => {
-    console.log('onBeforeSend:', tab);
+    log('onBeforeSend:', tab);
     const details = await browser.compose.getComposeDetails(tab.id);
-    console.log('Details:', details);
-    const conf = await browser.storage.local.get(['tags', 'identity', 'denyTo']);
+    log('Details:', details);
+    const conf = await loadCfg(['tags', 'identity', 'denyTo']);
     if (conf.identity && conf.identity != '*' && conf.identity != details.identityId) {
-        console.log('TagZiller: skipping identity ' + details.identityId);
+        log('Skipping identity ' + details.identityId);
         return;
     }
     if (conf.denyTo) {
@@ -56,12 +55,12 @@ browser.compose.onBeforeSend.addListener(async tab => {
         const receivers = [].concat(details.to, details.cc, details.bcc, details.newsgroups);
         for (let addr of receivers)
             if (deny.test(addr)) {
-                console.log('TagZiller: skipping, receiver in deny list: ' + addr);
+                log('Skipping, receiver in deny list: ' + addr);
                 return;
             }
     }
     if (!conf.tags || conf.tags.length == 0) {
-        console.log('TagZiller: database is empty.');
+        console.log('Database is empty.');
         return;
     }
     const tag = conf.tags[getRandomInt(conf.tag.length)];
@@ -69,16 +68,16 @@ browser.compose.onBeforeSend.addListener(async tab => {
     if (details.isPlainText) {
         // The message is being composed in plain text mode.
         let body = details.plainTextBody;
-        console.log(body);
+        log(body);
 
         // Make direct modifications to the message text, and send it back to the editor.
         body += '\n\n' + tag;
-        console.log(body);
+        log(body);
         browser.compose.setComposeDetails(tab.id, { plainTextBody: body });
     } else {
         // The message is being composed in HTML mode. Parse the message into an HTML document.
         let document = new DOMParser().parseFromString(details.body, 'text/html');
-        console.log(document);
+        log(document);
 
         // Use normal DOM manipulation to modify the message.
         let para = document.createElement('p');
@@ -87,7 +86,9 @@ browser.compose.onBeforeSend.addListener(async tab => {
 
         // Serialize the document back to HTML, and send it back to the editor.
         let html = new XMLSerializer().serializeToString(document);
-        console.log(html);
+        log(html);
         browser.compose.setComposeDetails(tab.id, { body: html });
     }
 });
+
+log('TagZiller started.');
