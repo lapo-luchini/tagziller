@@ -41,56 +41,44 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
 
+function escapeHTML(text) {
+    const el = document.createElement('div');
+    el.innerText = text;
+    return el.innerHTML;
+}
+
 async function addSignature(tab) {
     const details = await browser.compose.getComposeDetails(tab.id);
     log('Details:', details);
-    const conf = await loadCfg(['tags', 'identity', 'denyTo']);
-    if (conf.identity && conf.identity != '*' && conf.identity != details.identityId) {
-        log('Skipping identity ' + details.identityId);
-        return;
-    }
+    const conf = await loadCfg();
+    let isActive = true;
     if (conf.denyTo) {
         const deny = new RegExp(conf.denyTo);
         const receivers = [].concat(details.to, details.cc, details.bcc, details.newsgroups);
         for (let addr of receivers)
             if (deny.test(addr)) {
                 log('Skipping, receiver in deny list: ' + addr);
-                return;
+                isActive = false;
             }
     }
     if (!conf.tags || conf.tags.length == 0) {
-        console.log('Database is empty.');
+        console.log('Skipping, database is empty.');
+        isActive = false;
+    }
+    let body = details.isPlainText ? details.plainTextBody : details.body;
+    if (body.indexOf(conf.placeholder) < 0) {
+        console.log('Skipping, placeholder not found.');
         return;
     }
-    const tag = conf.tags[getRandomInt(conf.tags.length)];
-
-    if (details.isPlainText) {
-        // The message is being composed in plain text mode.
-        let body = details.plainTextBody;
-        log(body);
-
-        // Make direct modifications to the message text, and send it back to the editor.
-        body += '\n\n' + tag;
-        log(body);
+    let tag = isActive ? conf.tags[getRandomInt(conf.tags.length)] : '';
+    if (!details.isPlainText)
+        tag = escapeHTML(tag);
+    body = body.replace(conf.placeholder, tag);
+    log(body);
+    if (details.isPlainText)
         browser.compose.setComposeDetails(tab.id, { plainTextBody: body });
-    } else {
-        // The message is being composed in HTML mode. Parse the message into an HTML document.
-        let document = new DOMParser().parseFromString(details.body, 'text/html');
-
-        let para = document.createElement('p');
-        para.className = 'tagZiller';
-        if (conf.style) para.setAttribute('style', conf.style);
-        para.textContent = tag;
-
-        // Use normal DOM manipulation to modify the message.
-        let sig = document.querySelector('.moz-signature');
-        (sig ? sig : document.body).appendChild(para);
-
-        // Serialize the document back to HTML, and send it back to the editor.
-        let html = new XMLSerializer().serializeToString(document);
-        log(html);
-        browser.compose.setComposeDetails(tab.id, { body: html });
-    }
+    else
+        browser.compose.setComposeDetails(tab.id, { body: body });
 }
 
 browser.windows.onCreated.addListener(async window => {
@@ -98,6 +86,11 @@ browser.windows.onCreated.addListener(async window => {
     const tab = await browser.tabs.query({ windowId: window.id });
     log('onCreated:', tab[0]);
     addSignature(tab[0]);
+});
+
+browser.compose.onIdentityChanged.addListener(tab => {
+    log('onIdentityChanged:', tab);
+    addSignature(tab);
 });
 
 /*

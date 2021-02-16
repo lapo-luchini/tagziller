@@ -2,24 +2,15 @@ import { log, loadCfg } from './common.js';
 
 const file = document.getElementById('file');
 const num = document.getElementById('num');
-const identity = document.getElementById('identity');
+const placeholder = document.getElementById('placeholder');
 const denyTo = document.getElementById('denyTo');
 const ignore = /^#|^\s*$/;
 
-loadCfg(['tags', 'identity', 'denyTo']).then(async conf => {
+loadCfg().then(async conf => {
     // log('Config:', conf);
     num.innerText = conf.tags ? conf.tags.length : '0';
     denyTo.value = conf.denyTo || '';
-    for (let account of await browser.accounts.list()) {
-        for (let id of account.identities) {
-            const option = document.createElement('option');
-            option.value = id.id;
-            option.innerText = account.name + ' <' + id.email + '>';
-            identity.appendChild(option);
-            if (id.id == conf.identity)
-                option.selected = true;
-        }
-    }
+    placeholder.value = conf.placeholder || '';
 });
 
 file.oninput = () => {
@@ -38,11 +29,6 @@ file.oninput = () => {
     reader.readAsText(file.files[0]);
 };
 
-identity.oninput = () => {
-    log('New identity:', identity.value);
-    browser.storage.local.set({ identity: identity.value });
-};
-
 denyTo.oninput = () => {
     log('DenyTo:', denyTo.value);
     try {
@@ -53,4 +39,9 @@ denyTo.oninput = () => {
         denyTo.setCustomValidity('must be a valid regular expression');
         log('Invalid RegExp:', denyTo.value);
     }
+};
+
+placeholder.oninput = () => {
+    log('New placeholder:', placeholder.value);
+    browser.storage.local.set({ placeholder: placeholder.value });
 };
