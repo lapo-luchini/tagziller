@@ -22,15 +22,15 @@ messenger.composeAction.onClicked.addListener(async () => {
     }
 
     if (popup) {
-        // popup.focus();
+        messenger.windows.remove(popup.id);
         return;
     }
     popup = await messenger.windows.create({
         url: 'popup.html',
         type: 'popup',
         titlePreface: 'TagZiller',
-        height: 280,
-        width: 390
+        height: 350,
+        width: 450
     });
     await popupClosePromise(popup.id);
     popup = null;
