@@ -78,15 +78,13 @@ async function addSignature(tab) {
         let document = new DOMParser().parseFromString(details.body, 'text/html');
 
         let para = document.createElement('p');
+        para.className = 'tagZiller';
+        if (conf.style) para.setAttribute('style', conf.style);
         para.textContent = tag;
-        document.body.appendChild(para);
 
         // Use normal DOM manipulation to modify the message.
         let sig = document.querySelector('.moz-signature');
-        log('Sig:', sig);
-        (sig ? sig : document).appendChild(para);
-
-        log(document);
+        (sig ? sig : document.body).appendChild(para);
 
         // Serialize the document back to HTML, and send it back to the editor.
         let html = new XMLSerializer().serializeToString(document);
