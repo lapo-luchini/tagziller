@@ -41,9 +41,8 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
 
-browser.compose.onBeforeSend.addListener(async tab => {
-    log('onBeforeSend:', tab);
-    const details = await browser.compose.getComposeDetails(tab.id);
+async function addSignature(tab) {
+    const details = await messenger.compose.getComposeDetails(tab.id);
     log('Details:', details);
     const conf = await loadCfg(['tags', 'identity', 'denyTo']);
     if (conf.identity && conf.identity != '*' && conf.identity != details.identityId) {
@@ -73,22 +72,41 @@ browser.compose.onBeforeSend.addListener(async tab => {
         // Make direct modifications to the message text, and send it back to the editor.
         body += '\n\n' + tag;
         log(body);
-        browser.compose.setComposeDetails(tab.id, { plainTextBody: body });
+        messenger.compose.setComposeDetails(tab.id, { plainTextBody: body });
     } else {
         // The message is being composed in HTML mode. Parse the message into an HTML document.
         let document = new DOMParser().parseFromString(details.body, 'text/html');
-        log(document);
 
-        // Use normal DOM manipulation to modify the message.
         let para = document.createElement('p');
         para.textContent = tag;
         document.body.appendChild(para);
 
+        // Use normal DOM manipulation to modify the message.
+        let sig = document.querySelector('.moz-signature');
+        log('Sig:', sig);
+        (sig ? sig : document).appendChild(para);
+
+        log(document);
+
         // Serialize the document back to HTML, and send it back to the editor.
         let html = new XMLSerializer().serializeToString(document);
         log(html);
-        browser.compose.setComposeDetails(tab.id, { body: html });
+        messenger.compose.setComposeDetails(tab.id, { body: html });
     }
+}
+
+messenger.windows.onCreated.addListener(async window => {
+    if (window.type != "messageCompose") return;
+    const tab = await messenger.tabs.query({ windowId: window.id });
+    log('onCreated:', tab[0]);
+    addSignature(tab[0]);
 });
+
+/*
+messenger.compose.onBeforeSend.addListener(tab => {
+    log('onBeforeSend:', tab);
+    addSignature(tab);
+});
+*/
 
 log('TagZiller started.');
