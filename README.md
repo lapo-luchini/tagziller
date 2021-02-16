@@ -5,6 +5,12 @@ TagZiller is a [Thunderbird](https://www.thunderbird.net/) plug-in to allow addi
 
 This was once possible using [TagZilla](https://web.archive.org/web/20200422163705/http://tagzilla.mozdev.org/) but with deprecation of old extension system it is not usable anymore, so I decided to create this as a replacement for personal use.
 
+
+Known bugs
+----------
+
+When using plain text composer and changing identity signature is added all over again and sometimes a newline is added at the start or the end of the message, due to [issue 1692439](https://bugzilla.mozilla.org/show_bug.cgi?id=1692439).
+
 ISC license
 -----------
 
