@@ -4,16 +4,18 @@
   <meta charset="utf-8"/>
   <title></title>
   <style type="text/css">
-    .error {
-      background-color: rgba(255, 0, 0, 0.25);
+    select, input[type=text] {
+      width: 100%;
     }
   </style>
   <script src="popup.js" type="module"></script>
 </head>
 <body>
-  <p>Identity: <select id="identity"><option value="*">all identities</option></select></p>
-  <p>To/cc/bcc deny list: <input type="text" id="denyTo"></p>
-  <p>Database: <span id="num">0</span> tags.</p>
-  <p>Load content: <input type="file" id="file"></p>
+  <h3>Activation rules</h3>
+  <p>Only on identity:<br><select id="identity"><option value="*">all identities</option></select></p>
+  <p>To/cc/bcc deny regexp:<br><input type="text" id="denyTo"></p>
+  <h3>Tagline database</h3>
+  <p>Current content: <span id="num">0</span> tags.</p>
+  <p>Replace content: <input type="file" id="file"></p>
 </body>
 </html>

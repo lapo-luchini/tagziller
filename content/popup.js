@@ -22,7 +22,7 @@ loadCfg(['tags', 'identity', 'denyTo']).then(async conf => {
     }
 });
 
-file.onchange = () => {
+file.oninput = () => {
     const reader = new FileReader();
     reader.onload = (e) => {
         const tags = [];
@@ -31,24 +31,26 @@ file.onchange = () => {
                 continue;
             tags.push(s);
         }
+        log('Database:', tags);
         browser.storage.local.set({ tags: tags });
         num.innerText = tags.length;
     };
     reader.readAsText(file.files[0]);
 };
 
-identity.onchange = () => {
+identity.oninput = () => {
     log('New identity:', identity.value);
     browser.storage.local.set({ identity: identity.value });
 };
 
-denyTo.onchange = () => {
+denyTo.oninput = () => {
+    log('DenyTo:', denyTo.value);
     try {
         new RegExp(denyTo.value);
-        denyTo.className = '';
+        denyTo.setCustomValidity('');
         browser.storage.local.set({ denyTo: denyTo.value });
     } catch (e) {
-        denyTo.className = 'error';
+        denyTo.setCustomValidity('must be a valid regular expression');
         log('Invalid RegExp:', denyTo.value);
     }
 };
