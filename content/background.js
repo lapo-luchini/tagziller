@@ -1,10 +1,10 @@
 import { log, loadCfg } from './common.js';
 
 let popup = null;
-messenger.composeAction.onClicked.addListener(async () => {
+browser.composeAction.onClicked.addListener(async () => {
     async function popupClosePromise(popupId) {
         try {
-            await messenger.windows.get(popupId);
+            await browser.windows.get(popupId);
         } catch (e) {
             console.log('Error:', e);
             //window does not exist, assume closed
@@ -13,19 +13,19 @@ messenger.composeAction.onClicked.addListener(async () => {
         return new Promise(resolve => {
             function windowRemoveListener(closedId) {
                 if (popupId == closedId) {
-                    messenger.windows.onRemoved.removeListener(windowRemoveListener);
+                    browser.windows.onRemoved.removeListener(windowRemoveListener);
                     resolve();
                 }
             }
-            messenger.windows.onRemoved.addListener(windowRemoveListener);
+            browser.windows.onRemoved.addListener(windowRemoveListener);
         });
     }
 
     if (popup) {
-        messenger.windows.remove(popup.id);
+        browser.windows.remove(popup.id);
         return;
     }
-    popup = await messenger.windows.create({
+    popup = await browser.windows.create({
         url: 'popup.html',
         type: 'popup',
         titlePreface: 'TagZiller',
@@ -42,7 +42,7 @@ function getRandomInt(max) {
 }
 
 async function addSignature(tab) {
-    const details = await messenger.compose.getComposeDetails(tab.id);
+    const details = await browser.compose.getComposeDetails(tab.id);
     log('Details:', details);
     const conf = await loadCfg(['tags', 'identity', 'denyTo']);
     if (conf.identity && conf.identity != '*' && conf.identity != details.identityId) {
@@ -72,7 +72,7 @@ async function addSignature(tab) {
         // Make direct modifications to the message text, and send it back to the editor.
         body += '\n\n' + tag;
         log(body);
-        messenger.compose.setComposeDetails(tab.id, { plainTextBody: body });
+        browser.compose.setComposeDetails(tab.id, { plainTextBody: body });
     } else {
         // The message is being composed in HTML mode. Parse the message into an HTML document.
         let document = new DOMParser().parseFromString(details.body, 'text/html');
@@ -91,19 +91,19 @@ async function addSignature(tab) {
         // Serialize the document back to HTML, and send it back to the editor.
         let html = new XMLSerializer().serializeToString(document);
         log(html);
-        messenger.compose.setComposeDetails(tab.id, { body: html });
+        browser.compose.setComposeDetails(tab.id, { body: html });
     }
 }
 
-messenger.windows.onCreated.addListener(async window => {
+browser.windows.onCreated.addListener(async window => {
     if (window.type != "messageCompose") return;
-    const tab = await messenger.tabs.query({ windowId: window.id });
+    const tab = await browser.tabs.query({ windowId: window.id });
     log('onCreated:', tab[0]);
     addSignature(tab[0]);
 });
 
 /*
-messenger.compose.onBeforeSend.addListener(tab => {
+browser.compose.onBeforeSend.addListener(tab => {
     log('onBeforeSend:', tab);
     addSignature(tab);
 });
