@@ -1,41 +1,5 @@
 import { log, loadCfg } from './common.js';
 
-let popup = null;
-browser.composeAction.onClicked.addListener(async () => {
-    async function popupClosePromise(popupId) {
-        try {
-            await browser.windows.get(popupId);
-        } catch (e) {
-            console.log('Error:', e);
-            //window does not exist, assume closed
-            return;
-        }
-        return new Promise(resolve => {
-            function windowRemoveListener(closedId) {
-                if (popupId == closedId) {
-                    browser.windows.onRemoved.removeListener(windowRemoveListener);
-                    resolve();
-                }
-            }
-            browser.windows.onRemoved.addListener(windowRemoveListener);
-        });
-    }
-
-    if (popup) {
-        browser.windows.remove(popup.id);
-        return;
-    }
-    popup = await browser.windows.create({
-        url: 'popup.html',
-        type: 'popup',
-        titlePreface: 'TagZiller',
-        height: 350,
-        width: 450
-    });
-    await popupClosePromise(popup.id);
-    popup = null;
-});
-
 function getRandomInt(max) {
     max = Math.floor(max);
     return Math.floor(Math.random() * max);

@@ -19,8 +19,8 @@
   "background": {
     "page": "background.html"
   },
-  "compose_action": {
-    "default_title": "TagZ"
+  "options_ui": {
+    "page": "options.html"
   },
   "permissions": [
     "accountsRead",
